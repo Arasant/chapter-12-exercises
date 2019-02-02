@@ -1,33 +1,37 @@
 # Exercise 1: analyzing avocado sales with the `tidyr` package
 
 # Load necessary packages (`tidyr`, `dplyr`, and `ggplot2`)
-
+library("dplyr")
+library("tidyr")
+library("ggplot2")
 
 # Set your working directory using the RStudio menu:
 # Session > Set Working Directory > To Source File Location
-
+    
 # Load the `data/avocado.csv` file into a variable `avocados`
 # Make sure strings are *not* read in as factors
-
+avocados <- read.csv("avocado.csv", stringsAsFactors = FALSE)
 
 # To tell R to treat the `Date` column as a date (not just a string)
 # Redefine that column as a date using the `as.Date()` function
 # (hint: use the `mutate` function)
-
+get_date <- mutate(avocados, Date == as.Date(Date))
 
 # The file had some uninformative column names, so rename these columns:
 # `X4046` to `small_haas`
 # `X4225` to `large_haas`
 # `X4770` to `xlarge_haas`
-
+colnames(get_date) [5] <- "small_haas"
+colnames(get_date) [6] <- "large_haas"
+colnames(get_date) [7] <- "xlarge_haas"
 
 # The data only has sales for haas avocados. Create a new column `other_avos`
 # that is the Total.Volume minus all haas avocados (small, large, xlarge)
-
+new_column <- mutate(get_date, other_avos = Total.Volume - (small_haas + large_haas + xlarge_haas))
 
 # To perform analysis by avocado size, create a dataframe `by_size` that has
 # only `Date`, `other_avos`, `small_haas`, `large_haas`, `xlarge_haas`
-
+by_size <- select(new_column, Date, other_avos, small_haas, large_haas, xlarge_haas)
 
 # In order to visualize this data, it needs to be reshaped. The four columns
 # `other_avos`, `small_haas`, `large_haas`, `xlarge_haas` need to be 
@@ -36,7 +40,7 @@
 # `volume`. Create a new dataframe `size_gathered` by passing the `by_size` 
 # data frame to the `gather()` function. `size_gathered` will only have 3 
 # columns: `Date`, `size`, and `volume`.
-
+size_gathered <- gather(by_size, siZe = other_avos, -small_haas, -large_haas, -xlarge_haas, volume = colnames(by_size))
 
 # Using `size_gathered`, compute the average sales volume of each size 
 # (hint, first `group_by` size, then compute using `summarize`)
